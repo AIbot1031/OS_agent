@@ -34,7 +34,7 @@ function updateChapters() {
   const previous = chapterInput.value;
   const scoped = bank.filter(item => !subjectInput.value || item.subject === subjectInput.value);
   const categories = [...new Set(scoped.map(item => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "zh-Hant"));
-  chapterInput.replaceChildren(new Option("全部章節", ""), ...categories.map(category => new Option(category, category)));
+  chapterInput.replaceChildren(new Option("全部主題", ""), ...categories.map(category => new Option(category, category)));
   if (categories.includes(previous)) chapterInput.value = previous;
 }
 
