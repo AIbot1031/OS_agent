@@ -8,6 +8,7 @@
     *{box-sizing:border-box}body{margin:0;font:16px/1.55 system-ui,sans-serif;color:#172337;background:#f3f5f8}
     .app{display:flex;min-height:100vh}.practice{flex:1;padding:56px max(24px,7vw);overflow:auto;background:#111a27 url("assets/battle-bg.png") center center/cover no-repeat}
     .sheet{max-width:850px;margin:auto;padding:36px;background:#fffffff0;border-radius:14px;box-shadow:0 8px 28px #16233b30}
+    .factions{display:flex;justify-content:space-between;gap:12px;max-width:850px;margin:0 auto 22px}.faction{padding:8px 14px;background:#0b1425d9;border:1px solid #4a6684;color:#fff;font-weight:800;letter-spacing:.08em;border-radius:6px}.faction.os{border-color:#48cfff;color:#b3edff}.faction.algo{border-color:#ff9b40;color:#ffd1a6}
     .eyebrow{color:#1769cf;font-weight:700}.sheet h1{font-size:28px}.question{margin-top:32px;padding:22px;border:1px solid #dae1ec;border-left:4px solid #e94c59;border-radius:8px}
     .preview-note{color:#66758a;font-size:14px}.side{width:400px;min-width:330px;background:white;border-left:1px solid #dae1ec;box-shadow:-8px 0 20px #16233b0c;height:100vh;overflow:auto;position:sticky;top:0}
     .head{padding:18px 20px;background:#1769cf;color:white}.head h2{margin:0;font-size:20px}.head p{margin:2px 0 0;font-size:13px}
@@ -21,6 +22,7 @@
 <body>
   <div class="app">
     <main class="practice">
+      <div class="factions" aria-label="OS 與演算法陣營"><span class="faction os">OS｜核心防線</span><span class="faction algo">演算法｜排序攻勢</span></div>
       <div class="sheet">
         <p class="eyebrow">預覽用題目畫面</p>
         <h1>演算法練習</h1>
