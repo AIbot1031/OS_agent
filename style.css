@@ -16,7 +16,8 @@ section { margin-bottom: 20px; }
 .controls, .card { padding: 16px; background: white; border: 1px solid #d9e2ed; border-radius: 10px; }
 label { display: block; font-weight: 650; margin: 10px 0 5px; }
 input[type=file], textarea, select { box-sizing: border-box; width: 100%; }
-select { padding: 9px; border: 1px solid #acbacb; border-radius: 6px; background: white; font: inherit; }
+select { padding: 9px; border: 1px solid #acbacb; border-radius: 6px; background: white; color: #172337; font: inherit; }
+select option { background: white; color: #172337; }
 textarea { padding: 9px; border: 1px solid #acbacb; border-radius: 6px; resize: vertical; }
 button { width: 100%; margin-top: 10px; padding: 10px; border: 0; border-radius: 6px; background: #1769cf; color: white; font: inherit; cursor: pointer; }
 button.secondary { background: #e7eef8; color: #123d73; }
