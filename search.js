@@ -34,6 +34,7 @@
     let items;
     if (/\.html?$/i.test(filename)) {
       const doc = new DOMParser().parseFromString(text, "text/html");
+      const subject = /作業系統/.test(doc.querySelector("#subject-title")?.textContent || "") ? "os" : "algorithm";
       items = [...doc.querySelectorAll("article.card[data-id]")].map(card => {
         const answerBlock = card.querySelector(".answer")?.textContent?.replace(/^正確答案\s*/, "").trim();
         const markedOptions = [...card.querySelectorAll(".option.correct")]
@@ -41,6 +42,8 @@
           .filter(Boolean).join(" | ");
         return {
           sourceId: card.getAttribute("data-id"),
+          subject,
+          category: card.querySelector(".meta span:nth-child(3)")?.textContent?.trim() || "",
           question: (card.querySelector(".structured-question") || card.querySelector("h2"))?.textContent?.trim() || "",
           answer: answerBlock || markedOptions || ""
         };
@@ -53,6 +56,8 @@
     const bank = items.map((item, index) => ({
       id: index + 1,
       sourceId: item?.sourceId || "",
+      subject: item?.subject || item?.科目 || "",
+      category: item?.category || item?.章節 || item?.主題 || "",
       question: item && typeof item === "object" ? pick(item, questionKeys) : "",
       answer: item && typeof item === "object" ? pick(item, answerKeys) : ""
     })).filter(x => x.question);
