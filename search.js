@@ -84,7 +84,12 @@
     const a = normalize(query), b = normalize(question);
     if (!a || !b) return 0;
     if (a.includes(b)) return 1;
-    if (b.includes(a) && a.length >= 4) return 0.85;
+    if (b.includes(a) && a.length >= 2) return 0.9;
+    const terms = String(query).trim().split(/\s+/).map(normalize).filter(Boolean);
+    if (terms.length >= 2 && terms.length <= 6 && a.length <= 60 && terms.every(term => term.length >= 2)) {
+      if (!terms.every(term => b.includes(term))) return 0;
+      return 0.82 + Math.min(0.12, a.length / Math.max(1, b.length) * 0.12);
+    }
     const left = grams(a), right = grams(b);
     let common = 0;
     for (const gram of right) if (left.has(gram)) common++;
