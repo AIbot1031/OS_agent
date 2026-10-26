@@ -35,6 +35,9 @@
     if (/\.html?$/i.test(filename)) {
       const doc = new DOMParser().parseFromString(text, "text/html");
       const subject = /作業系統/.test(doc.querySelector("#subject-title")?.textContent || "") ? "os" : "algorithm";
+      const activeUnit = doc.querySelector(".unit-button.active[data-unit]");
+      const unit = Number(activeUnit?.getAttribute("data-unit")) || null;
+      const unitLabel = unit ? activeUnit?.querySelector("span")?.textContent?.trim() || `第 ${unit} 單元` : "";
       items = [...doc.querySelectorAll("article.card[data-id]")].map(card => {
         const answerBlock = card.querySelector(".answer")?.textContent?.replace(/^正確答案\s*/, "").trim();
         const markedOptions = [...card.querySelectorAll(".option.correct")]
@@ -43,6 +46,8 @@
         return {
           sourceId: card.getAttribute("data-id"),
           subject,
+          unit,
+          unitLabel,
           category: card.querySelector(".meta span:nth-child(3)")?.textContent?.trim() || "",
           question: (card.querySelector(".structured-question") || card.querySelector("h2"))?.textContent?.trim() || "",
           answer: answerBlock || markedOptions || ""
@@ -57,6 +62,8 @@
       id: index + 1,
       sourceId: item?.sourceId || "",
       subject: item?.subject || item?.科目 || "",
+      unit: item?.unit || item?.單元 || null,
+      unitLabel: item?.unitLabel || "",
       category: item?.category || item?.章節 || item?.主題 || "",
       question: item && typeof item === "object" ? pick(item, questionKeys) : "",
       answer: item && typeof item === "object" ? pick(item, answerKeys) : ""
@@ -69,7 +76,17 @@
     const merged = new Map();
     for (const item of [...base, ...extra]) {
       const key = item.sourceId || normalize(item.question);
-      if (key) merged.set(key, item);
+      if (key) {
+        const old = merged.get(key);
+        merged.set(key, old ? {
+          ...old, ...item,
+          subject: item.subject || old.subject,
+          unit: item.unit || old.unit,
+          unitLabel: item.unitLabel || old.unitLabel,
+          category: item.category || old.category,
+          answer: item.answer || old.answer
+        } : item);
+      }
     }
     return [...merged.values()];
   }

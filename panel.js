@@ -5,6 +5,7 @@ const status = document.querySelector("#status");
 const results = document.querySelector("#results");
 const query = document.querySelector("#query");
 const subjectInput = document.querySelector("#subject");
+const unitInput = document.querySelector("#unit");
 const chapterInput = document.querySelector("#chapter");
 let bank = [];
 let customBank = [];
@@ -30,9 +31,21 @@ document.querySelector("#openSite").addEventListener("click", () =>
 
 function setStatus(message) { status.textContent = message; }
 
+function updateUnits() {
+  const previous = unitInput.value;
+  const scoped = bank.filter(item => !subjectInput.value || item.subject === subjectInput.value);
+  const units = [...new Map(scoped.filter(item => item.unit).map(item => [String(item.unit), item.unitLabel || `第 ${item.unit} 單元`])).entries()]
+    .sort((a, b) => Number(a[0]) - Number(b[0]));
+  unitInput.replaceChildren(new Option("全部單元", ""), ...units.map(([value, label]) => new Option(label, value)));
+  if (units.some(([value]) => value === previous)) unitInput.value = previous;
+}
+
 function updateChapters() {
   const previous = chapterInput.value;
-  const scoped = bank.filter(item => !subjectInput.value || item.subject === subjectInput.value);
+  const scoped = bank.filter(item =>
+    (!subjectInput.value || item.subject === subjectInput.value) &&
+    (!unitInput.value || String(item.unit) === unitInput.value)
+  );
   const categories = [...new Set(scoped.map(item => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "zh-Hant"));
   chapterInput.replaceChildren(new Option("全部主題", ""), ...categories.map(category => new Option(category, category)));
   if (categories.includes(previous)) chapterInput.value = previous;
@@ -54,7 +67,7 @@ function render(matches) {
     title.textContent = item.question;
     const score = document.createElement("span");
     score.className = "score";
-    score.textContent = `${item.subject === "os" ? "作業系統" : item.subject === "algorithm" ? "演算法" : "未分類"} · ${item.category || "未分類"} · 相似度 ${Math.round(item.score * 100)}%`;
+    score.textContent = `${item.subject === "os" ? "作業系統" : item.subject === "algorithm" ? "演算法" : "未分類"} · ${item.unitLabel || "未分單元"} · ${item.category || "未分類"} · 相似度 ${Math.round(item.score * 100)}%`;
     card.append(title, score);
     if (item.answer) {
       const answer = document.createElement("p");
@@ -72,6 +85,7 @@ function runSearch(queries) {
   if (!cleaned.length) { setStatus("找不到可搜尋的題目文字。"); return; }
   const scoped = bank.filter(item =>
     (!subjectInput.value || item.subject === subjectInput.value) &&
+    (!unitInput.value || String(item.unit) === unitInput.value) &&
     (!chapterInput.value || item.category === chapterInput.value)
   );
   const matches = QuestionSearch.search(scoped, cleaned);
@@ -87,6 +101,7 @@ fileInput.addEventListener("change", async () => {
     customBank = QuestionSearch.mergeBanks(customBank, parsed);
     await chrome.storage.local.set({ customBank });
     bank = QuestionSearch.mergeBanks(bank, parsed);
+    updateUnits();
     updateChapters();
     bankCount.textContent = `目前可搜尋 ${bank.length} 題（新增題庫儲存在本機）`;
     setStatus(`已加入 ${parsed.length} 題。`);
@@ -94,7 +109,8 @@ fileInput.addEventListener("change", async () => {
 });
 
 document.querySelector("#search").addEventListener("click", () => runSearch([query.value]));
-subjectInput.addEventListener("change", () => { updateChapters(); if (query.value.trim()) runSearch([query.value]); });
+subjectInput.addEventListener("change", () => { updateUnits(); updateChapters(); if (query.value.trim()) runSearch([query.value]); });
+unitInput.addEventListener("change", () => { updateChapters(); if (query.value.trim()) runSearch([query.value]); });
 chapterInput.addEventListener("change", () => { if (query.value.trim()) runSearch([query.value]); });
 document.querySelector("#scan").addEventListener("click", async () => {
   try {
@@ -117,6 +133,7 @@ Promise.all([
 ]).then(([builtIn, data]) => {
   customBank = Array.isArray(data.customBank) ? data.customBank : (Array.isArray(data.bank) ? data.bank : []);
   bank = QuestionSearch.mergeBanks(builtIn, customBank);
+  updateUnits();
   updateChapters();
   bankCount.textContent = `目前可搜尋 ${bank.length} 題（內建演算法 439 題、作業系統 891 題）`;
 }).catch(() => setStatus("題庫載入失敗，請重新開啟側邊面板。"));

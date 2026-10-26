@@ -6,8 +6,8 @@
   <title>題庫側邊欄預覽</title>
   <style>
     *{box-sizing:border-box}body{margin:0;font:16px/1.55 system-ui,sans-serif;color:#172337;background:#f3f5f8}
-    .app{display:flex;min-height:100vh}.practice{flex:1;padding:56px max(24px,7vw);overflow:auto}
-    .sheet{max-width:850px;margin:auto;padding:36px;background:white;border-radius:14px;box-shadow:0 8px 28px #16233b18}
+    .app{display:flex;min-height:100vh}.practice{flex:1;padding:56px max(24px,7vw);overflow:auto;background:#111a27 url("assets/battle-bg.png") center center/cover no-repeat}
+    .sheet{max-width:850px;margin:auto;padding:36px;background:#fffffff0;border-radius:14px;box-shadow:0 8px 28px #16233b30}
     .eyebrow{color:#1769cf;font-weight:700}.sheet h1{font-size:28px}.question{margin-top:32px;padding:22px;border:1px solid #dae1ec;border-left:4px solid #e94c59;border-radius:8px}
     .preview-note{color:#66758a;font-size:14px}.side{width:400px;min-width:330px;background:white;border-left:1px solid #dae1ec;box-shadow:-8px 0 20px #16233b0c;height:100vh;overflow:auto;position:sticky;top:0}
     .head{padding:18px 20px;background:#1769cf;color:white}.head h2{margin:0;font-size:20px}.head p{margin:2px 0 0;font-size:13px}
@@ -36,6 +36,8 @@
       <div class="body">
         <label for="subject">科目</label>
         <select id="subject"><option value="">全部科目</option><option value="algorithm">演算法</option><option value="os">作業系統</option></select>
+        <label for="unit">網站單元</label>
+        <select id="unit"><option value="">全部單元</option></select>
         <label for="chapter">主題標籤</label>
         <select id="chapter"><option value="">全部主題</option></select>
         <label for="query">搜尋題目或關鍵字</label>
