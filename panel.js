@@ -6,6 +6,25 @@ const results = document.querySelector("#results");
 const query = document.querySelector("#query");
 let bank = [];
 let customBank = [];
+const siteView = document.querySelector("#siteView");
+const searchView = document.querySelector("#searchView");
+const showSite = document.querySelector("#showSite");
+const showSearch = document.querySelector("#showSearch");
+
+function switchView(view) {
+  const site = view === "site";
+  siteView.hidden = !site;
+  searchView.hidden = site;
+  showSite.classList.toggle("active", site);
+  showSearch.classList.toggle("active", !site);
+  showSite.setAttribute("aria-pressed", String(site));
+  showSearch.setAttribute("aria-pressed", String(!site));
+}
+showSite.addEventListener("click", () => switchView("site"));
+showSearch.addEventListener("click", () => switchView("search"));
+document.querySelector("#openSite").addEventListener("click", () =>
+  chrome.tabs.create({ url: "https://os-study-notebook.shij.chatgpt.site/" })
+);
 
 function setStatus(message) { status.textContent = message; }
 

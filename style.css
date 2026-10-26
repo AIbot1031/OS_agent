@@ -4,6 +4,14 @@ header { padding: 16px 20px; background: #1769cf; color: white; }
 h1 { margin: 0; font-size: 21px; }
 header p { margin: 2px 0 0; font-size: 13px; }
 main { padding: 16px; }
+.views { display: flex; padding: 8px; gap: 8px; background: #e7eef8; }
+.views button { margin: 0; flex: 1; }
+.views .view:not(.active) { background: white; color: #1769cf; }
+.site-view { margin: 0; }
+.site-help { margin: 8px 12px; color: #47586e; font-size: 12px; }
+.site-view iframe { display: block; width: 100%; height: calc(100vh - 168px); border: 0; background: white; }
+.site-open { display: block; width: calc(100% - 24px); margin: 8px 12px; }
+[hidden] { display: none !important; }
 section { margin-bottom: 20px; }
 .controls, .card { padding: 16px; background: white; border: 1px solid #d9e2ed; border-radius: 10px; }
 label { display: block; font-weight: 650; margin: 10px 0 5px; }

@@ -11,7 +11,16 @@
     <h1>題庫搜尋</h1>
     <p>從目前頁面找相似題目</p>
   </header>
-  <main>
+  <nav class="views" aria-label="側邊欄檢視">
+    <button id="showSite" class="view active" aria-pressed="true">題庫網站</button>
+    <button id="showSearch" class="view" aria-pressed="false">本機搜尋</button>
+  </nav>
+  <section id="siteView" class="site-view">
+    <p class="site-help">在右側直接瀏覽題庫網站。若網站拒絕嵌入，請切換「本機搜尋」。</p>
+    <iframe id="bankSite" title="演算法與作業系統學習題庫" src="https://os-study-notebook.shij.chatgpt.site/"></iframe>
+    <button id="openSite" class="secondary site-open">在新分頁開啟題庫網站</button>
+  </section>
+  <main id="searchView" hidden>
     <section class="controls">
       <label for="bankFile">加入題庫（HTML、JSON、CSV 或 TSV）</label>
       <input id="bankFile" type="file" accept=".html,.htm,.json,.csv,.tsv,text/html,application/json,text/csv,text/tab-separated-values">
