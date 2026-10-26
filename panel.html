@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>題庫搜尋</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>題庫搜尋</h1>
+    <p>從目前頁面找相似題目</p>
+  </header>
+  <main>
+    <section class="controls">
+      <label for="bankFile">加入題庫（HTML、JSON、CSV 或 TSV）</label>
+      <input id="bankFile" type="file" accept=".html,.htm,.json,.csv,.tsv,text/html,application/json,text/csv,text/tab-separated-values">
+      <p id="bankCount" class="muted">尚未匯入題庫</p>
+      <button id="scan">搜尋目前頁面</button>
+      <label for="query">或輸入題目關鍵字</label>
+      <textarea id="query" rows="3" placeholder="貼上題目或輸入關鍵字"></textarea>
+      <button id="search" class="secondary">搜尋文字</button>
+      <p id="status" role="status" aria-live="polite"></p>
+    </section>
+    <section>
+      <h2>搜尋結果</h2>
+      <div id="results"></div>
+    </section>
+  </main>
+  <script src="search.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>

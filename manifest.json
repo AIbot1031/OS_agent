@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "題庫側邊搜尋",
+  "version": "0.1.0",
+  "description": "從目前頁面的題目文字搜尋自己匯入的題庫。",
+  "permissions": ["activeTab", "scripting", "storage", "sidePanel", "tabs"],
+  "action": { "default_title": "開啟題庫搜尋" },
+  "background": { "service_worker": "background.js" },
+  "side_panel": { "default_path": "panel.html" }
+}
