@@ -12,6 +12,8 @@ main { padding: 16px; }
 .site-view iframe { display: block; width: 100%; height: calc(100vh - 168px); border: 0; background: white; }
 .site-open { display: block; width: calc(100% - 24px); margin: 8px 12px; }
 [hidden] { display: none !important; }
+.paste-zone { margin-top: 12px; padding: 16px 10px; border: 2px dashed #86a9d1; border-radius: 8px; background: #f2f7fe; color: #24568d; text-align: center; cursor: text; }
+.paste-zone:focus-visible { outline: 3px solid #ffad35; }
 section { margin-bottom: 20px; }
 .controls, .card { padding: 16px; background: white; border: 1px solid #d9e2ed; border-radius: 10px; }
 label { display: block; font-weight: 650; margin: 10px 0 5px; }

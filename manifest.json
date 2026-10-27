@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "題庫側邊搜尋",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "從目前頁面的題目文字搜尋自己匯入的題庫。",
   "permissions": ["activeTab", "scripting", "storage", "sidePanel", "tabs"],
   "host_permissions": ["https://ccsa.nfu.edu.tw/*"],

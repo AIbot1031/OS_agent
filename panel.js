@@ -1,6 +1,7 @@
 "use strict";
 const fileInput = document.querySelector("#bankFile");
 const imageFileInput = document.querySelector("#imageFile");
+const pasteZone = document.querySelector("#pasteZone");
 const bankCount = document.querySelector("#bankCount");
 const status = document.querySelector("#status");
 const results = document.querySelector("#results");
@@ -155,6 +156,15 @@ document.querySelector("#capture").addEventListener("click", async () => {
 imageFileInput.addEventListener("change", () => {
   const file = imageFileInput.files?.[0];
   if (file) recognizeAndSearch(file);
+});
+
+pasteZone.addEventListener("click", () => pasteZone.focus());
+document.addEventListener("paste", event => {
+  const image = [...(event.clipboardData?.items || [])]
+    .find(item => item.kind === "file" && item.type.startsWith("image/"))?.getAsFile();
+  if (!image) return;
+  event.preventDefault();
+  recognizeAndSearch(image);
 });
 
 let consumingScreenshot = false;
