@@ -26,6 +26,9 @@
       <input id="bankFile" type="file" accept=".html,.htm,.json,.csv,.tsv,text/html,application/json,text/csv,text/tab-separated-values">
       <p id="bankCount" class="muted">尚未匯入題庫</p>
       <button id="scan">搜尋目前頁面</button>
+      <button id="capture" class="secondary">截圖辨識並搜尋</button>
+      <label for="imageFile">或上傳題目截圖</label>
+      <input id="imageFile" type="file" accept="image/*">
       <label for="subject">科目</label>
       <select id="subject"><option value="">全部科目</option><option value="algorithm">演算法</option><option value="os">作業系統</option></select>
       <label for="unit">網站單元</label>
@@ -43,6 +46,8 @@
     </section>
   </main>
   <script src="search.js"></script>
+  <script src="vendor/ocr/tesseract.min.js"></script>
+  <script src="ocr.js"></script>
   <script src="panel.js"></script>
 </body>
 </html>

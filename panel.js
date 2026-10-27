@@ -1,5 +1,6 @@
 "use strict";
 const fileInput = document.querySelector("#bankFile");
+const imageFileInput = document.querySelector("#imageFile");
 const bankCount = document.querySelector("#bankCount");
 const status = document.querySelector("#status");
 const results = document.querySelector("#results");
@@ -9,6 +10,7 @@ const unitInput = document.querySelector("#unit");
 const chapterInput = document.querySelector("#chapter");
 let bank = [];
 let customBank = [];
+let bankReady;
 const siteView = document.querySelector("#siteView");
 const searchView = document.querySelector("#searchView");
 const showSite = document.querySelector("#showSite");
@@ -125,7 +127,58 @@ document.querySelector("#scan").addEventListener("click", async () => {
   }
 });
 
-Promise.all([
+async function recognizeAndSearch(image) {
+  switchView("search");
+  setStatus("正在載入本機 OCR 辨識模型，第一次使用可能需要一些時間…");
+  try {
+    const text = (await LocalOCR.recognize(image, setStatus)).trim();
+    if (!text) { setStatus("截圖中沒有辨識出文字。請裁切到題目區域後重試。"); return; }
+    query.value = text.slice(0, 3000);
+    await bankReady;
+    runSearch(LocalOCR.passages(text));
+  } catch (error) {
+    setStatus(`截圖辨識失敗：${error.message}`);
+  }
+}
+
+document.querySelector("#capture").addEventListener("click", async () => {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id || tab.windowId === undefined) throw new Error("找不到目前分頁");
+    const screenshot = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+    await recognizeAndSearch(screenshot);
+  } catch (error) {
+    setStatus(`無法擷取畫面：${error.message}。也可以上傳截圖檔案。`);
+  }
+});
+
+imageFileInput.addEventListener("change", () => {
+  const file = imageFileInput.files?.[0];
+  if (file) recognizeAndSearch(file);
+});
+
+let consumingScreenshot = false;
+async function consumePendingScreenshot() {
+  if (consumingScreenshot) return;
+  consumingScreenshot = true;
+  try {
+    const data = await chrome.storage.session.get(["pendingScreenshot", "captureError"]);
+    if (data.pendingScreenshot) {
+      await chrome.storage.session.remove(["pendingScreenshot", "captureError"]);
+      await recognizeAndSearch(data.pendingScreenshot);
+    } else if (data.captureError) {
+      await chrome.storage.session.remove("captureError");
+      switchView("search");
+      setStatus(`快捷鍵截圖失敗：${data.captureError}`);
+    }
+  } finally { consumingScreenshot = false; }
+}
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "session" && (changes.pendingScreenshot || changes.captureError)) consumePendingScreenshot();
+});
+consumePendingScreenshot();
+
+bankReady = Promise.all([
   Promise.all(["bank.json", "os-bank.json"].map(name =>
     fetch(chrome.runtime.getURL(name)).then(response => response.json())
   )).then(parts => parts.flat()),

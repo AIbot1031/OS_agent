@@ -1,10 +1,17 @@
 {
   "manifest_version": 3,
   "name": "題庫側邊搜尋",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "從目前頁面的題目文字搜尋自己匯入的題庫。",
   "permissions": ["activeTab", "scripting", "storage", "sidePanel", "tabs"],
   "host_permissions": ["https://ccsa.nfu.edu.tw/*"],
+  "content_security_policy": { "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
+  "commands": {
+    "capture-search": {
+      "suggested_key": { "default": "Ctrl+Shift+Y", "mac": "Command+Shift+Y" },
+      "description": "截圖辨識並在側邊欄搜尋題目"
+    }
+  },
   "action": { "default_title": "開啟題庫搜尋" },
   "background": { "service_worker": "background.js" },
   "side_panel": { "default_path": "panel.html" }
