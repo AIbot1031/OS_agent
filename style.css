@@ -7,6 +7,12 @@ main { padding: 16px; }
 .views { display: flex; padding: 8px; gap: 8px; background: #e7eef8; }
 .views button { margin: 0; flex: 1; }
 .views .view:not(.active) { background: white; color: #1769cf; }
+.art-panel { margin: 0; padding: 4px 8px; background: #142033; color: #d9e9fa; }
+.art-panel summary { cursor: pointer; font-size: 12px; }
+.battle-hero { position: relative; width: min(100%, 480px); aspect-ratio: 9 / 16; margin: 10px auto; background: #111a27 url("assets/battle-portrait.png") center/cover no-repeat; box-sizing: border-box; border-radius: 8px; overflow: hidden; }
+.faction-label { padding: 5px 8px; border-radius: 4px; background: #0b1425d9; color: white; font-size: clamp(10px, 2vw, 14px); font-weight: 700; white-space: nowrap; }
+.faction-label.os { position: absolute; top: 12px; left: 12px; border: 1px solid #48cfff; color: #b3edff; }
+.faction-label.algorithm { position: absolute; bottom: 12px; right: 12px; border: 1px solid #ff9b40; color: #ffd1a6; }
 .site-view { margin: 0; }
 .site-help { margin: 8px 12px; color: #47586e; font-size: 12px; }
 .site-view iframe { display: block; width: 100%; height: calc(100vh - 168px); border: 0; background: white; }
