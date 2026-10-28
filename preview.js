@@ -44,7 +44,19 @@ function search() {
     const meta = document.createElement("div"); meta.className = "meta";
     meta.textContent = `${item.subject === "os" ? "作業系統" : "演算法"} · ${item.unitLabel || "未分單元"} · ${item.category || "未分類"} · ${Math.round(item.score * 100)}% 相似`;
     card.append(title, meta);
-    if (item.answer) { const answer = document.createElement("p"); answer.textContent = `答案：${item.answer}`; card.append(answer); }
+    if (item.answer) {
+      const answer = document.createElement("div"); answer.className = "answer-block";
+      const label = document.createElement("strong"); label.textContent = "答案"; answer.append(label);
+      const parts = item.answer.split(/\s+\|\s+/).filter(Boolean);
+      if (parts.length > 1) {
+        const list = document.createElement("ul");
+        for (const part of parts) { const li = document.createElement("li"); li.textContent = part; list.append(li); }
+        answer.append(list);
+      } else {
+        const value = document.createElement("p"); value.textContent = item.answer; answer.append(value);
+      }
+      card.append(answer);
+    }
     results.append(card);
   }
 }

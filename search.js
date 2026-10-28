@@ -39,7 +39,11 @@
       const unit = Number(activeUnit?.getAttribute("data-unit")) || null;
       const unitLabel = unit ? activeUnit?.querySelector("span")?.textContent?.trim() || `第 ${unit} 單元` : "";
       items = [...doc.querySelectorAll("article.card[data-id]")].map(card => {
-        const answerBlock = card.querySelector(".answer")?.textContent?.replace(/^正確答案\s*/, "").trim();
+        const answerNode = card.querySelector(".answer");
+        const answerList = [...(answerNode?.querySelectorAll("li") || [])]
+          .map(li => li.textContent.trim()).filter(Boolean);
+        const answerBlock = answerList.length ? answerList.join(" | ")
+          : answerNode?.textContent?.replace(/^正確答案\s*/, "").trim();
         const markedOptions = [...card.querySelectorAll(".option.correct")]
           .map(option => option.querySelector("span:nth-child(2)")?.textContent?.trim())
           .filter(Boolean).join(" | ");

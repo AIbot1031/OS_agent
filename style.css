@@ -34,3 +34,8 @@ h2 { font-size: 17px; }
 .card p { margin: 6px 0; white-space: pre-wrap; }
 .score { color: #53627a; font-size: 12px; }
 .answer { border-top: 1px solid #e5ebf2; padding-top: 8px; }
+.answer-block { margin-top: 12px; padding: 10px 12px; border-left: 4px solid #15925c; border-radius: 6px; background: #e3f8ec; color: #104f36; }
+.answer-block strong { font-size: 14px; }
+.answer-block p { margin: 5px 0 0; font-weight: 700; }
+.answer-block ul { margin: 6px 0 0; padding-left: 22px; }
+.answer-block li { margin: 3px 0; font-weight: 650; }

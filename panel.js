@@ -73,9 +73,21 @@ function render(matches) {
     score.textContent = `${item.subject === "os" ? "作業系統" : item.subject === "algorithm" ? "演算法" : "未分類"} · ${item.unitLabel || "未分單元"} · ${item.category || "未分類"} · 相似度 ${Math.round(item.score * 100)}%`;
     card.append(title, score);
     if (item.answer) {
-      const answer = document.createElement("p");
-      answer.className = "answer";
-      answer.textContent = `答案：${item.answer}`;
+      const answer = document.createElement("div");
+      answer.className = "answer-block";
+      const label = document.createElement("strong");
+      label.textContent = "答案";
+      answer.append(label);
+      const parts = item.answer.split(/\s+\|\s+/).map(part => part.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        const list = document.createElement("ul");
+        for (const part of parts) { const li = document.createElement("li"); li.textContent = part; list.append(li); }
+        answer.append(list);
+      } else {
+        const value = document.createElement("p");
+        value.textContent = item.answer;
+        answer.append(value);
+      }
       card.append(answer);
     }
     results.append(card);
@@ -109,6 +121,50 @@ fileInput.addEventListener("change", async () => {
     bankCount.textContent = `目前可搜尋 ${bank.length} 題（新增題庫儲存在本機）`;
     setStatus(`已加入 ${parsed.length} 題。`);
   } catch (error) { setStatus(`匯入失敗：${error.message}`); }
+});
+
+async function waitForTab(tabId) {
+  const tab = await chrome.tabs.get(tabId);
+  if (tab.status === "complete") return;
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { chrome.tabs.onUpdated.removeListener(onUpdate); reject(new Error("網站載入逾時")); }, 30000);
+    function onUpdate(updatedId, change) {
+      if (updatedId !== tabId || change.status !== "complete") return;
+      clearTimeout(timer);
+      chrome.tabs.onUpdated.removeListener(onUpdate);
+      resolve();
+    }
+    chrome.tabs.onUpdated.addListener(onUpdate);
+    chrome.tabs.get(tabId).then(current => {
+      if (current.status === "complete") onUpdate(tabId, { status: "complete" });
+    }).catch(reject);
+  });
+}
+
+document.querySelector("#syncSite").addEventListener("click", async () => {
+  let tab;
+  const button = document.querySelector("#syncSite");
+  button.disabled = true;
+  setStatus("正在開啟題庫網站並讀取兩科題目…");
+  try {
+    await bankReady;
+    tab = await chrome.tabs.create({ url: "https://os-study-notebook.shij.chatgpt.site/", active: false });
+    await waitForTab(tab.id);
+    const [result] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["site-sync.js"] });
+    if (!Array.isArray(result?.result) || !result.result.length) throw new Error("網站沒有回傳題目");
+    const before = bank.length;
+    customBank = QuestionSearch.mergeBanks(customBank, result.result);
+    await chrome.storage.local.set({ customBank });
+    bank = QuestionSearch.mergeBanks(bank, result.result);
+    updateUnits(); updateChapters();
+    bankCount.textContent = `目前可搜尋 ${bank.length} 題（網站同步資料儲存在本機）`;
+    setStatus(`同步完成：讀取 ${result.result.length} 題，新增 ${bank.length - before} 題。`);
+  } catch (error) {
+    setStatus(`網站同步失敗：${error.message}。可繼續使用內建題庫或匯入 HTML。`);
+  } finally {
+    if (tab?.id) chrome.tabs.remove(tab.id).catch(() => {});
+    button.disabled = false;
+  }
 });
 
 document.querySelector("#search").addEventListener("click", () => runSearch([query.value]));
@@ -198,5 +254,5 @@ bankReady = Promise.all([
   bank = QuestionSearch.mergeBanks(builtIn, customBank);
   updateUnits();
   updateChapters();
-  bankCount.textContent = `目前可搜尋 ${bank.length} 題（內建演算法 439 題、作業系統 891 題）`;
+  bankCount.textContent = `目前可搜尋 ${bank.length} 題（內建演算法 439 題、作業系統 958 題）`;
 }).catch(() => setStatus("題庫載入失敗，請重新開啟側邊面板。"));
