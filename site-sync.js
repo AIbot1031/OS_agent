@@ -36,7 +36,7 @@
         question: clean((card.querySelector(".structured-question") || card.querySelector("h2"))?.textContent),
         answer: answerList.length ? answerList.join(" | ") : clean(answerBlock?.textContent).replace(/^正確答案\s*/, "") || markedOptions.join(" | "),
         subject: subject.key,
-        category: clean(card.querySelector(".meta span:nth-child(3)")?.textContent),
+        category: clean(card.querySelector(".meta span:last-child")?.textContent),
         unit: null,
         unitLabel: ""
       };

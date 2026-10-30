@@ -52,7 +52,7 @@
           subject,
           unit,
           unitLabel,
-          category: card.querySelector(".meta span:nth-child(3)")?.textContent?.trim() || "",
+          category: card.querySelector(".meta span:last-child")?.textContent?.trim() || "",
           question: (card.querySelector(".structured-question") || card.querySelector("h2"))?.textContent?.trim() || "",
           answer: answerBlock || markedOptions || ""
         };

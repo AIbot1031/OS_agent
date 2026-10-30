@@ -69,6 +69,7 @@ chapterInput.addEventListener("change", search);
 Promise.all(["bank.json", "os-bank.json"].map(name => fetch(name).then(response => response.json())))
   .then(([algorithm, os]) => {
     bank = [...algorithm, ...os];
+    document.querySelector("#previewCount").textContent = `左側只是示意頁面。右側可用內建 ${bank.length.toLocaleString("zh-Hant")} 題試搜尋。`;
     updateUnits();
     updateChapters();
     search();

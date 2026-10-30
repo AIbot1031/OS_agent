@@ -254,5 +254,7 @@ bankReady = Promise.all([
   bank = QuestionSearch.mergeBanks(builtIn, customBank);
   updateUnits();
   updateChapters();
-  bankCount.textContent = `目前可搜尋 ${bank.length} 題（內建演算法 439 題、作業系統 958 題）`;
+  const algorithmCount = builtIn.filter(item => item.subject === "algorithm").length;
+  const osCount = builtIn.filter(item => item.subject === "os").length;
+  bankCount.textContent = `目前可搜尋 ${bank.length} 題（內建演算法 ${algorithmCount} 題、作業系統 ${osCount} 題）`;
 }).catch(() => setStatus("題庫載入失敗，請重新開啟側邊面板。"));
