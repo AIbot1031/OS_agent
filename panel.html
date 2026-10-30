@@ -13,12 +13,25 @@
   </header>
   <nav class="views" aria-label="側邊欄檢視">
     <button id="showSite" class="view active" aria-pressed="true">題庫網站</button>
+    <button id="showSite2" class="view" aria-pressed="false">題庫網站 2</button>
     <button id="showSearch" class="view" aria-pressed="false">本機搜尋</button>
   </nav>
   <section id="siteView" class="site-view">
     <p class="site-help">在右側直接瀏覽題庫網站。若網站拒絕嵌入，請切換「本機搜尋」。</p>
     <iframe id="bankSite" title="演算法與作業系統學習題庫" src="https://os-study-notebook.shij.chatgpt.site/"></iframe>
     <button id="openSite" class="secondary site-open">在新分頁開啟題庫網站</button>
+  </section>
+  <section id="site2View" class="site-view" hidden>
+    <div class="site-settings">
+      <label for="site2Name">頁籤名稱</label>
+      <input id="site2Name" type="text" value="題庫網站 2" maxlength="20">
+      <label for="site2Url">第二個題庫網站網址</label>
+      <input id="site2Url" type="url" placeholder="https://example.com/" inputmode="url">
+      <button id="saveSite2">儲存並開啟網站</button>
+      <p id="site2Status" role="status"></p>
+    </div>
+    <iframe id="bankSite2" title="第二個題庫網站" hidden></iframe>
+    <button id="openSite2" class="secondary site-open" hidden>在新分頁開啟第二個題庫網站</button>
   </section>
   <main id="searchView" hidden>
     <section class="controls">

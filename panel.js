@@ -13,24 +13,72 @@ let bank = [];
 let customBank = [];
 let bankReady;
 const siteView = document.querySelector("#siteView");
+const site2View = document.querySelector("#site2View");
 const searchView = document.querySelector("#searchView");
 const showSite = document.querySelector("#showSite");
+const showSite2 = document.querySelector("#showSite2");
 const showSearch = document.querySelector("#showSearch");
+const site2Name = document.querySelector("#site2Name");
+const site2Url = document.querySelector("#site2Url");
+const bankSite2 = document.querySelector("#bankSite2");
+const openSite2 = document.querySelector("#openSite2");
+const site2Status = document.querySelector("#site2Status");
+const defaultSecondSite = {
+  url: "https://yocheng06.github.io/course-library/submit.html?v=theme-toggle-20261027",
+  name: "題庫網站 2"
+};
 
 function switchView(view) {
-  const site = view === "site";
-  siteView.hidden = !site;
-  searchView.hidden = site;
-  showSite.classList.toggle("active", site);
-  showSearch.classList.toggle("active", !site);
-  showSite.setAttribute("aria-pressed", String(site));
-  showSearch.setAttribute("aria-pressed", String(!site));
+  for (const [name, panel, button] of [
+    ["site", siteView, showSite], ["site2", site2View, showSite2], ["search", searchView, showSearch]
+  ]) {
+    const active = view === name;
+    panel.hidden = !active;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
 }
 showSite.addEventListener("click", () => switchView("site"));
+showSite2.addEventListener("click", () => switchView("site2"));
 showSearch.addEventListener("click", () => switchView("search"));
 document.querySelector("#openSite").addEventListener("click", () =>
   chrome.tabs.create({ url: "https://os-study-notebook.shij.chatgpt.site/" })
 );
+
+function validSiteUrl(value) {
+  const parsed = new URL(value.trim());
+  if (parsed.protocol !== "https:") throw new Error("請輸入 https:// 開頭的網站網址");
+  return parsed.href;
+}
+
+function displaySite2(url, name) {
+  site2Name.value = name || "題庫網站 2";
+  showSite2.textContent = site2Name.value;
+  site2Url.value = url || "";
+  bankSite2.title = site2Name.value;
+  bankSite2.hidden = !url;
+  openSite2.hidden = !url;
+  if (url) bankSite2.src = url;
+  else bankSite2.removeAttribute("src");
+}
+
+document.querySelector("#saveSite2").addEventListener("click", async () => {
+  try {
+    const url = validSiteUrl(site2Url.value);
+    const name = site2Name.value.trim() || "題庫網站 2";
+    await chrome.storage.local.set({ secondSite: { url, name } });
+    displaySite2(url, name);
+    site2Status.textContent = "已儲存。若網站拒絕在側欄顯示，可按下方按鈕在新分頁開啟。";
+  } catch (error) { site2Status.textContent = error.message; }
+});
+openSite2.addEventListener("click", () => {
+  try { chrome.tabs.create({ url: validSiteUrl(site2Url.value) }); }
+  catch (error) { site2Status.textContent = error.message; }
+});
+chrome.storage.local.get("secondSite").then(data => {
+  const site = data.secondSite?.url ? data.secondSite : defaultSecondSite;
+  displaySite2(site.url, site.name);
+});
 
 function setStatus(message) { status.textContent = message; }
 

@@ -7,11 +7,16 @@ main { padding: 16px; }
 #searchView { min-height: calc(100vh - 130px); background: linear-gradient(180deg, #101a2b55, #101a2b99), url("assets/battle-portrait.png") center top / cover fixed no-repeat; }
 .views { display: flex; padding: 8px; gap: 8px; background: #e7eef8; }
 .views button { margin: 0; flex: 1; }
+.views button { padding: 8px 4px; font-size: 13px; }
 .views .view:not(.active) { background: white; color: #1769cf; }
 .site-view { margin: 0; }
 .site-help { margin: 8px 12px; color: #47586e; font-size: 12px; }
 .site-view iframe { display: block; width: 100%; height: calc(100vh - 168px); border: 0; background: white; }
 .site-open { display: block; width: calc(100% - 24px); margin: 8px 12px; }
+.site-settings { padding: 12px; background: #fff; }
+.site-settings label { margin-top: 4px; }
+.site-settings input { box-sizing: border-box; width: 100%; padding: 9px; border: 1px solid #acbacb; border-radius: 6px; font: inherit; }
+.site-settings p { margin: 8px 0 0; color: #47586e; font-size: 12px; }
 [hidden] { display: none !important; }
 .paste-zone { margin-top: 12px; padding: 16px 10px; border: 2px dashed #86a9d1; border-radius: 8px; background: #f2f7fe; color: #24568d; text-align: center; cursor: text; }
 .paste-zone:focus-visible { outline: 3px solid #ffad35; }
