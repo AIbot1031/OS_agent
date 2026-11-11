@@ -278,9 +278,11 @@ async function recognizeAndSearch(image) {
     if (!text) { setStatus("截圖中沒有辨識出文字。請裁切到題目區域後重試。"); return; }
     ocrText.textContent = text.slice(0, 3000);
     await bankReady;
-    const matches = runSearch(LocalOCR.passages(text));
+    const parsedQuestion = LocalOCR.extractQuestion(text);
+    const primary = parsedQuestion ? runSearch([parsedQuestion]) : [];
+    const matches = primary[0]?.score >= 0.8 ? primary : runSearch(LocalOCR.passages(text));
     const bankQuestion = matches[0]?.score >= 0.8 ? matches[0].question : "";
-    const extracted = bankQuestion || LocalOCR.extractQuestion(text);
+    const extracted = bankQuestion || parsedQuestion;
     if (extracted) {
       questionText.value = extracted;
       questionSource.textContent = bankQuestion ? "已使用題庫中匹配的完整題幹。" : "由截圖文字擷取，複製前請確認。";
