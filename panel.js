@@ -5,6 +5,10 @@ const pasteZone = document.querySelector("#pasteZone");
 const bankCount = document.querySelector("#bankCount");
 const manageStatus = document.querySelector("#manageStatus");
 const ocrText = document.querySelector("#ocrText");
+const questionBox = document.querySelector("#questionBox");
+const questionText = document.querySelector("#questionText");
+const questionSource = document.querySelector("#questionSource");
+const copyStatus = document.querySelector("#copyStatus");
 const status = document.querySelector("#status");
 const results = document.querySelector("#results");
 let bank = [];
@@ -163,13 +167,23 @@ async function showQuestionOnSite(item) {
 }
 
 function runSearch(queries) {
-  if (!bank.length) { setStatus("題庫尚未載入。"); return; }
+  if (!bank.length) { setStatus("題庫尚未載入。"); return []; }
   const cleaned = queries.map(s => s.trim()).filter(Boolean);
-  if (!cleaned.length) { setStatus("找不到可搜尋的題目文字。"); return; }
+  if (!cleaned.length) { setStatus("找不到可搜尋的題目文字。"); return []; }
   const matches = QuestionSearch.search(bank, cleaned);
   render(matches);
   setStatus(`搜尋 ${cleaned.length} 段文字，找到 ${matches.length} 筆相似題目。`);
+  return matches;
 }
+
+document.querySelector("#copyQuestion").addEventListener("click", async () => {
+  const text = questionText.value.trim();
+  if (!text) { copyStatus.textContent = "沒有可複製的題目文字。"; return; }
+  try {
+    await navigator.clipboard.writeText(text);
+    copyStatus.textContent = "已複製題目文字。";
+  } catch (error) { copyStatus.textContent = `複製失敗：${error.message}`; }
+});
 
 fileInput.addEventListener("change", async () => {
   const file = fileInput.files?.[0];
@@ -230,13 +244,22 @@ document.querySelector("#syncSite").addEventListener("click", async () => {
 async function recognizeAndSearch(image) {
   switchView("search");
   ocrText.textContent = "";
+  questionBox.hidden = true;
+  copyStatus.textContent = "";
   setStatus("正在載入本機 OCR 辨識模型，第一次使用可能需要一些時間…");
   try {
     const text = (await LocalOCR.recognize(image, setStatus)).trim();
     if (!text) { setStatus("截圖中沒有辨識出文字。請裁切到題目區域後重試。"); return; }
     ocrText.textContent = text.slice(0, 3000);
     await bankReady;
-    runSearch(LocalOCR.passages(text));
+    const matches = runSearch(LocalOCR.passages(text));
+    const bankQuestion = matches[0]?.score >= 0.8 ? matches[0].question : "";
+    const extracted = bankQuestion || LocalOCR.extractQuestion(text);
+    if (extracted) {
+      questionText.value = extracted;
+      questionSource.textContent = bankQuestion ? "已使用題庫中匹配的完整題幹。" : "由截圖文字擷取，複製前請確認。";
+      questionBox.hidden = false;
+    }
   } catch (error) {
     setStatus(`截圖辨識失敗：${error.message}`);
   }

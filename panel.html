@@ -49,6 +49,14 @@
         <pre id="ocrText"></pre>
       </details>
     </section>
+    <section id="questionBox" class="controls" hidden>
+      <h2>題目文字（不含選項）</h2>
+      <p id="questionSource" class="muted"></p>
+      <label for="questionText">複製前可在這裡修正辨識錯字</label>
+      <textarea id="questionText" rows="4"></textarea>
+      <button id="copyQuestion">一鍵複製題目</button>
+      <p id="copyStatus" role="status" aria-live="polite"></p>
+    </section>
     <section>
       <h2>搜尋結果</h2>
       <div id="results"></div>
