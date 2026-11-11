@@ -3,12 +3,10 @@ const fileInput = document.querySelector("#bankFile");
 const imageFileInput = document.querySelector("#imageFile");
 const pasteZone = document.querySelector("#pasteZone");
 const bankCount = document.querySelector("#bankCount");
+const manageStatus = document.querySelector("#manageStatus");
+const ocrText = document.querySelector("#ocrText");
 const status = document.querySelector("#status");
 const results = document.querySelector("#results");
-const query = document.querySelector("#query");
-const subjectInput = document.querySelector("#subject");
-const unitInput = document.querySelector("#unit");
-const chapterInput = document.querySelector("#chapter");
 let bank = [];
 let customBank = [];
 let bankReady;
@@ -83,32 +81,12 @@ chrome.storage.local.get("secondSite").then(data => {
 
 function setStatus(message) { status.textContent = message; }
 
-function updateUnits() {
-  const previous = unitInput.value;
-  const scoped = bank.filter(item => !subjectInput.value || item.subject === subjectInput.value);
-  const units = [...new Map(scoped.filter(item => item.unit).map(item => [String(item.unit), item.unitLabel || `第 ${item.unit} 單元`])).entries()]
-    .sort((a, b) => Number(a[0]) - Number(b[0]));
-  unitInput.replaceChildren(new Option("全部單元", ""), ...units.map(([value, label]) => new Option(label, value)));
-  if (units.some(([value]) => value === previous)) unitInput.value = previous;
-}
-
-function updateChapters() {
-  const previous = chapterInput.value;
-  const scoped = bank.filter(item =>
-    (!subjectInput.value || item.subject === subjectInput.value) &&
-    (!unitInput.value || String(item.unit) === unitInput.value)
-  );
-  const categories = [...new Set(scoped.map(item => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "zh-Hant"));
-  chapterInput.replaceChildren(new Option("全部主題", ""), ...categories.map(category => new Option(category, category)));
-  if (categories.includes(previous)) chapterInput.value = previous;
-}
-
 function render(matches) {
   results.replaceChildren();
   if (!matches.length) {
     const empty = document.createElement("p");
     empty.className = "muted";
-    empty.textContent = "沒有找到相似題目。可試著選取題幹或輸入更完整的文字。";
+    empty.textContent = "沒有找到相似題目。請裁切出題目區域，或換一張清晰的截圖重試。";
     results.append(empty);
     return;
   }
@@ -185,15 +163,10 @@ async function showQuestionOnSite(item) {
 }
 
 function runSearch(queries) {
-  if (!bank.length) { setStatus("請先匯入題庫。"); return; }
+  if (!bank.length) { setStatus("題庫尚未載入。"); return; }
   const cleaned = queries.map(s => s.trim()).filter(Boolean);
   if (!cleaned.length) { setStatus("找不到可搜尋的題目文字。"); return; }
-  const scoped = bank.filter(item =>
-    (!subjectInput.value || item.subject === subjectInput.value) &&
-    (!unitInput.value || String(item.unit) === unitInput.value) &&
-    (!chapterInput.value || item.category === chapterInput.value)
-  );
-  const matches = QuestionSearch.search(scoped, cleaned);
+  const matches = QuestionSearch.search(bank, cleaned);
   render(matches);
   setStatus(`搜尋 ${cleaned.length} 段文字，找到 ${matches.length} 筆相似題目。`);
 }
@@ -206,11 +179,9 @@ fileInput.addEventListener("change", async () => {
     customBank = QuestionSearch.mergeBanks(customBank, parsed);
     await chrome.storage.local.set({ customBank });
     bank = QuestionSearch.mergeBanks(bank, parsed);
-    updateUnits();
-    updateChapters();
     bankCount.textContent = `目前可搜尋 ${bank.length} 題（新增題庫儲存在本機）`;
-    setStatus(`已加入 ${parsed.length} 題。`);
-  } catch (error) { setStatus(`匯入失敗：${error.message}`); }
+    manageStatus.textContent = `已加入 ${parsed.length} 題。`;
+  } catch (error) { manageStatus.textContent = `匯入失敗：${error.message}`; }
 });
 
 async function waitForTab(tabId) {
@@ -235,7 +206,7 @@ document.querySelector("#syncSite").addEventListener("click", async () => {
   let tab;
   const button = document.querySelector("#syncSite");
   button.disabled = true;
-  setStatus("正在開啟題庫網站並讀取兩科題目…");
+  manageStatus.textContent = "正在開啟題庫網站並讀取兩科題目…";
   try {
     await bankReady;
     tab = await chrome.tabs.create({ url: "https://os-study-notebook.shij.chatgpt.site/", active: false });
@@ -246,41 +217,24 @@ document.querySelector("#syncSite").addEventListener("click", async () => {
     customBank = QuestionSearch.mergeBanks(customBank, result.result);
     await chrome.storage.local.set({ customBank });
     bank = QuestionSearch.mergeBanks(bank, result.result);
-    updateUnits(); updateChapters();
     bankCount.textContent = `目前可搜尋 ${bank.length} 題（網站同步資料儲存在本機）`;
-    setStatus(`同步完成：讀取 ${result.result.length} 題，新增 ${bank.length - before} 題。`);
+    manageStatus.textContent = `同步完成：讀取 ${result.result.length} 題，新增 ${bank.length - before} 題。`;
   } catch (error) {
-    setStatus(`網站同步失敗：${error.message}。可繼續使用內建題庫或匯入 HTML。`);
+    manageStatus.textContent = `網站同步失敗：${error.message}。可繼續使用內建題庫或匯入 HTML。`;
   } finally {
     if (tab?.id) chrome.tabs.remove(tab.id).catch(() => {});
     button.disabled = false;
   }
 });
 
-document.querySelector("#search").addEventListener("click", () => runSearch([query.value]));
-subjectInput.addEventListener("change", () => { updateUnits(); updateChapters(); if (query.value.trim()) runSearch([query.value]); });
-unitInput.addEventListener("change", () => { updateChapters(); if (query.value.trim()) runSearch([query.value]); });
-chapterInput.addEventListener("change", () => { if (query.value.trim()) runSearch([query.value]); });
-document.querySelector("#scan").addEventListener("click", async () => {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) throw new Error("找不到目前分頁");
-    const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["scanner.js"] });
-    const passages = injection.result || [];
-    if (passages.length) query.value = passages[0];
-    runSearch(passages);
-  } catch (error) {
-    setStatus(`無法讀取此頁面：${error.message}。請在一般網頁上重試，或手動輸入題目。`);
-  }
-});
-
 async function recognizeAndSearch(image) {
   switchView("search");
+  ocrText.textContent = "";
   setStatus("正在載入本機 OCR 辨識模型，第一次使用可能需要一些時間…");
   try {
     const text = (await LocalOCR.recognize(image, setStatus)).trim();
     if (!text) { setStatus("截圖中沒有辨識出文字。請裁切到題目區域後重試。"); return; }
-    query.value = text.slice(0, 3000);
+    ocrText.textContent = text.slice(0, 3000);
     await bankReady;
     runSearch(LocalOCR.passages(text));
   } catch (error) {
@@ -347,8 +301,6 @@ bankReady = Promise.all([
 ]).then(([builtIn, data]) => {
   customBank = Array.isArray(data.customBank) ? data.customBank : (Array.isArray(data.bank) ? data.bank : []);
   bank = QuestionSearch.mergeBanks(builtIn, customBank);
-  updateUnits();
-  updateChapters();
   const algorithmCount = builtIn.filter(item => item.subject === "algorithm").length;
   const osCount = builtIn.filter(item => item.subject === "os").length;
   bankCount.textContent = `目前可搜尋 ${bank.length} 題（內建演算法 ${algorithmCount} 題、作業系統 ${osCount} 題）`;

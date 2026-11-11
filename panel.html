@@ -9,7 +9,7 @@
 <body>
   <header>
     <h1>題庫搜尋</h1>
-    <p>從目前頁面找相似題目</p>
+    <p>截圖辨識並查找相似題目</p>
   </header>
   <nav class="views" aria-label="側邊欄檢視">
     <button id="showSite" class="view active" aria-pressed="true">題庫網站</button>
@@ -35,32 +35,31 @@
   </section>
   <main id="searchView" hidden>
     <section class="controls">
-      <label for="bankFile">加入題庫（HTML、JSON、CSV 或 TSV）</label>
-      <input id="bankFile" type="file" accept=".html,.htm,.json,.csv,.tsv,text/html,application/json,text/csv,text/tab-separated-values">
-      <p id="bankCount" class="muted">尚未匯入題庫</p>
-      <button id="syncSite" class="secondary">從題庫網站同步最新題目</button>
-      <button id="scan">搜尋目前頁面</button>
-      <button id="capture" class="secondary">截圖辨識並搜尋</button>
+      <h2>截圖搜尋</h2>
+      <button id="capture">擷取目前畫面並搜尋</button>
       <div id="pasteZone" class="paste-zone" tabindex="0" role="button" aria-label="貼上題目截圖">
         點這裡，再按 Ctrl+V 貼上截圖
       </div>
       <label for="imageFile">或上傳題目截圖</label>
       <input id="imageFile" type="file" accept="image/*">
-      <label for="subject">科目</label>
-      <select id="subject"><option value="">全部科目</option><option value="algorithm">演算法</option><option value="os">作業系統</option></select>
-      <label for="unit">網站單元</label>
-      <select id="unit"><option value="">全部單元</option></select>
-      <label for="chapter">主題標籤</label>
-      <select id="chapter"><option value="">全部主題</option></select>
-      <label for="query">或輸入題目關鍵字</label>
-      <textarea id="query" rows="3" placeholder="貼上題目或輸入關鍵字"></textarea>
-      <button id="search" class="secondary">搜尋文字</button>
+      <p id="bankCount" class="muted">題庫載入中…</p>
       <p id="status" role="status" aria-live="polite"></p>
+      <details id="recognizedText">
+        <summary>查看辨識出的文字</summary>
+        <pre id="ocrText"></pre>
+      </details>
     </section>
     <section>
       <h2>搜尋結果</h2>
       <div id="results"></div>
     </section>
+    <details id="bankManage" class="controls">
+      <summary>題庫管理（匯入與網站同步）</summary>
+      <label for="bankFile">加入題庫（HTML、JSON、CSV 或 TSV）</label>
+      <input id="bankFile" type="file" accept=".html,.htm,.json,.csv,.tsv,text/html,application/json,text/csv,text/tab-separated-values">
+      <button id="syncSite" class="secondary">從題庫網站同步最新題目</button>
+      <p id="manageStatus" role="status" aria-live="polite"></p>
+    </details>
   </main>
   <script src="search.js"></script>
   <script src="vendor/ocr/tesseract.min.js"></script>

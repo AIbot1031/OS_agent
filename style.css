@@ -22,6 +22,11 @@ main { padding: 16px; }
 .paste-zone:focus-visible { outline: 3px solid #ffad35; }
 section { margin-bottom: 20px; }
 .controls, .card { padding: 16px; background: #ffffffc7; border: 1px solid #d9e2ed; border-radius: 10px; backdrop-filter: blur(2px); }
+.controls > h2 { margin: 0 0 10px; }
+#recognizedText, #bankManage { margin-top: 12px; }
+#recognizedText summary, #bankManage summary { cursor: pointer; font-weight: 650; }
+#ocrText { max-height: 180px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 ui-monospace, monospace; }
+#manageStatus { color: #47586e; font-size: 13px; }
 label { display: block; font-weight: 650; margin: 10px 0 5px; }
 input[type=file], textarea, select { box-sizing: border-box; width: 100%; }
 select { padding: 9px; border: 1px solid #acbacb; border-radius: 6px; background: white; color: #172337; font: inherit; }
