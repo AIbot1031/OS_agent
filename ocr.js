@@ -50,5 +50,31 @@
     }
     return selected.join(" ").trim().slice(0, 1200);
   }
-  root.LocalOCR = { recognize, passages, extractQuestion };
+
+  function extractStudyItem(text) {
+    const lines = String(text).split(/\r?\n/).map(line => line.replace(/\s+/g, " ").trim()).filter(Boolean);
+    const answerPattern = /^(?:正確答案|參考答案|標準答案|correct answer)\s*[:：]?\s*(.*)$/i;
+    const stopPattern = /^(?:解析|說明|得分|下一題|下一頁|題目\s*\d*\s*[:：]|explanation|score)/i;
+    const optionPattern = /^(?:[A-HＡ-Ｈ][.)．、]|[（(][A-HＡ-Ｈ][)）]|[1-9１-９][.)．、]|[①-⑩])\s*/i;
+    const answerIndex = lines.findIndex(line => answerPattern.test(line));
+    let answer = "";
+    if (answerIndex >= 0) {
+      const parts = [];
+      const inline = lines[answerIndex].match(answerPattern)?.[1]?.trim();
+      if (inline) parts.push(inline);
+      for (const line of lines.slice(answerIndex + 1)) {
+        if (stopPattern.test(line) || answerPattern.test(line)) break;
+        parts.push(line.replace(/^[•●○✓✔]\s*/, ""));
+        if (parts.join(" ").length >= 1000) break;
+      }
+      answer = parts.join(" | ").trim().slice(0, 1000);
+    }
+    const optionStart = lines.findIndex(line => optionPattern.test(line));
+    const optionEnd = answerIndex >= 0 ? answerIndex : lines.length;
+    const options = optionStart >= 0 && optionStart < optionEnd
+      ? lines.slice(optionStart, optionEnd).filter(line => !/^(?:你的答案|答案|解析|得分)\s*[:：]?/.test(line)).join("\n").slice(0, 2000)
+      : "";
+    return { question: extractQuestion(text), options, answer, answerFound: answerIndex >= 0 };
+  }
+  root.LocalOCR = { recognize, passages, extractQuestion, extractStudyItem };
 })(globalThis);

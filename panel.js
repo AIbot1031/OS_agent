@@ -11,8 +11,22 @@ const questionSource = document.querySelector("#questionSource");
 const copyStatus = document.querySelector("#copyStatus");
 const status = document.querySelector("#status");
 const results = document.querySelector("#results");
+const addView = document.querySelector("#addView");
+const addStatus = document.querySelector("#addStatus");
+const addRawText = document.querySelector("#addRawText");
+const addPasteZone = document.querySelector("#addPasteZone");
+const addImageFile = document.querySelector("#addImageFile");
+const newQuestion = document.querySelector("#newQuestion");
+const newOptions = document.querySelector("#newOptions");
+const newAnswer = document.querySelector("#newAnswer");
+const newSubject = document.querySelector("#newSubject");
+const newUnit = document.querySelector("#newUnit");
+const newCategory = document.querySelector("#newCategory");
+const saveStatus = document.querySelector("#saveStatus");
+const manualCount = document.querySelector("#manualCount");
 let bank = [];
 let customBank = [];
+let manualBank = [];
 let bankReady;
 const siteView = document.querySelector("#siteView");
 const site2View = document.querySelector("#site2View");
@@ -20,6 +34,7 @@ const searchView = document.querySelector("#searchView");
 const showSite = document.querySelector("#showSite");
 const showSite2 = document.querySelector("#showSite2");
 const showSearch = document.querySelector("#showSearch");
+const showAdd = document.querySelector("#showAdd");
 const site2Name = document.querySelector("#site2Name");
 const site2Url = document.querySelector("#site2Url");
 const bankSite2 = document.querySelector("#bankSite2");
@@ -33,7 +48,7 @@ const originalSiteUrl = "https://os-study-notebook.shij.chatgpt.site/";
 
 function switchView(view) {
   for (const [name, panel, button] of [
-    ["site", siteView, showSite], ["site2", site2View, showSite2], ["search", searchView, showSearch]
+    ["site", siteView, showSite], ["site2", site2View, showSite2], ["search", searchView, showSearch], ["add", addView, showAdd]
   ]) {
     const active = view === name;
     panel.hidden = !active;
@@ -44,6 +59,7 @@ function switchView(view) {
 showSite.addEventListener("click", () => switchView("site"));
 showSite2.addEventListener("click", () => switchView("site2"));
 showSearch.addEventListener("click", () => switchView("search"));
+showAdd.addEventListener("click", () => switchView("add"));
 document.querySelector("#openSite").addEventListener("click", () =>
   chrome.tabs.create({ url: "https://os-study-notebook.shij.chatgpt.site/" })
 );
@@ -103,6 +119,16 @@ function render(matches) {
     score.className = "score";
     score.textContent = `${item.subject === "os" ? "作業系統" : item.subject === "algorithm" ? "演算法" : "未分類"} · ${item.unitLabel || "未分單元"} · ${item.category || "未分類"} · 相似度 ${Math.round(item.score * 100)}%`;
     card.append(title, score);
+    if (item.options) {
+      const options = document.createElement("details");
+      const heading = document.createElement("summary");
+      heading.textContent = "查看選項";
+      const value = document.createElement("pre");
+      value.className = "option-list";
+      value.textContent = item.options;
+      options.append(heading, value);
+      card.append(options);
+    }
     if (item.answer) {
       const answer = document.createElement("div");
       answer.className = "answer-block";
@@ -265,6 +291,84 @@ async function recognizeAndSearch(image) {
   }
 }
 
+async function recognizeForAdd(image) {
+  switchView("add");
+  addStatus.textContent = "正在辨識截圖…";
+  addRawText.textContent = "";
+  saveStatus.textContent = "";
+  newQuestion.value = "";
+  newOptions.value = "";
+  newAnswer.value = "";
+  try {
+    const text = (await LocalOCR.recognize(image, message => { addStatus.textContent = message; })).trim();
+    if (!text) { addStatus.textContent = "截圖中沒有辨識出文字。請裁切到題目區域後重試。"; return; }
+    const item = LocalOCR.extractStudyItem(text);
+    addRawText.textContent = text.slice(0, 6000);
+    newQuestion.value = item.question;
+    newOptions.value = item.options;
+    newAnswer.value = item.answer;
+    addStatus.textContent = item.answerFound
+      ? "已讀取題目與標示的正確答案；請核對後儲存。"
+      : "已讀取題目。截圖沒有明確標示正確答案，請自行核對並填寫。";
+  } catch (error) { addStatus.textContent = `辨識失敗：${error.message}`; }
+}
+
+document.querySelector("#addCapture").addEventListener("click", async () => {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id || tab.windowId === undefined) throw new Error("找不到目前分頁");
+    await recognizeForAdd(await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }));
+  } catch (error) { addStatus.textContent = `無法擷取畫面：${error.message}`; }
+});
+
+addImageFile.addEventListener("change", () => {
+  const file = addImageFile.files?.[0];
+  if (file) recognizeForAdd(file);
+});
+addPasteZone.addEventListener("click", () => addPasteZone.focus());
+
+document.querySelector("#addSave").addEventListener("click", async () => {
+  const question = newQuestion.value.trim();
+  const answer = newAnswer.value.trim();
+  const unit = newUnit.value ? Number(newUnit.value) : null;
+  if (!question) { saveStatus.textContent = "請先確認題目文字。"; return; }
+  if (!answer) { saveStatus.textContent = "請先填寫並確認正確答案。"; return; }
+  if (unit !== null && (!Number.isInteger(unit) || unit < 1)) { saveStatus.textContent = "網站單元須為正整數。"; return; }
+  try {
+    await bankReady;
+    if (bank.some(item => item.subject === newSubject.value && QuestionSearch.normalize(item.question) === QuestionSearch.normalize(question))) {
+      saveStatus.textContent = "題庫已有相同題目，請確認後再新增。";
+      return;
+    }
+    const item = {
+      sourceId: `local-${crypto.randomUUID()}`,
+      question, options: newOptions.value.trim(), answer,
+      subject: newSubject.value,
+      unit, unitLabel: unit ? `第 ${unit} 單元` : "",
+      category: newCategory.value.trim() || "自行新增"
+    };
+    const nextManualBank = [...manualBank, item];
+    await chrome.storage.local.set({ manualBank: nextManualBank });
+    manualBank = nextManualBank;
+    bank = QuestionSearch.mergeBanks(bank, [item]);
+    bankCount.textContent = `目前可搜尋 ${bank.length} 題（含自行新增 ${manualBank.length} 題）`;
+    manualCount.textContent = `自行新增 ${manualBank.length} 題，儲存在本機瀏覽器。`;
+    saveStatus.textContent = "已加入本機題庫。";
+  } catch (error) { saveStatus.textContent = `儲存失敗：${error.message}`; }
+});
+
+document.querySelector("#exportAdded").addEventListener("click", () => {
+  if (!manualBank.length) { saveStatus.textContent = "目前沒有自行新增的題目。"; return; }
+  const url = URL.createObjectURL(new Blob([JSON.stringify(manualBank, null, 2)], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "OS_agent_自行新增題庫.json";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+});
+
 document.querySelector("#capture").addEventListener("click", async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -287,7 +391,8 @@ document.addEventListener("paste", event => {
     .find(item => item.kind === "file" && item.type.startsWith("image/"))?.getAsFile();
   if (!image) return;
   event.preventDefault();
-  recognizeAndSearch(image);
+  if (!addView.hidden) recognizeForAdd(image);
+  else recognizeAndSearch(image);
 });
 
 let consumingScreenshot = false;
@@ -320,10 +425,12 @@ bankReady = Promise.all([
   Promise.all(["bank.json", "os-bank.json"].map(name =>
     fetch(chrome.runtime.getURL(name)).then(response => response.json())
   )).then(parts => parts.flat()),
-  chrome.storage.local.get(["customBank", "bank"])
+  chrome.storage.local.get(["customBank", "bank", "manualBank"])
 ]).then(([builtIn, data]) => {
   customBank = Array.isArray(data.customBank) ? data.customBank : (Array.isArray(data.bank) ? data.bank : []);
-  bank = QuestionSearch.mergeBanks(builtIn, customBank);
+  manualBank = Array.isArray(data.manualBank) ? data.manualBank : [];
+  bank = QuestionSearch.mergeBanks(QuestionSearch.mergeBanks(builtIn, customBank), manualBank);
+  manualCount.textContent = `自行新增 ${manualBank.length} 題，儲存在本機瀏覽器。`;
   const algorithmCount = builtIn.filter(item => item.subject === "algorithm").length;
   const osCount = builtIn.filter(item => item.subject === "os").length;
   bankCount.textContent = `目前可搜尋 ${bank.length} 題（內建演算法 ${algorithmCount} 題、作業系統 ${osCount} 題）`;

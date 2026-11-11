@@ -25,24 +25,28 @@ section { margin-bottom: 20px; }
 .controls > h2 { margin: 0 0 10px; }
 #recognizedText, #bankManage { margin-top: 12px; }
 #recognizedText summary, #bankManage summary { cursor: pointer; font-weight: 650; }
-#ocrText { max-height: 180px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 ui-monospace, monospace; }
+#ocrText, #addRawText { max-height: 180px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 ui-monospace, monospace; }
 #copyStatus { margin: 6px 0 0; color: #176642; font-size: 13px; }
 #manageStatus { color: #47586e; font-size: 13px; }
 label { display: block; font-weight: 650; margin: 10px 0 5px; }
-input[type=file], textarea, select { box-sizing: border-box; width: 100%; }
+input[type=file], input[type=number], input[type=text], textarea, select { box-sizing: border-box; width: 100%; }
+input[type=number], input[type=text] { padding: 9px; border: 1px solid #acbacb; border-radius: 6px; background: white; color: #172337; font: inherit; }
 select { padding: 9px; border: 1px solid #acbacb; border-radius: 6px; background: white; color: #172337; font: inherit; }
 select option { background: white; color: #172337; }
 textarea { padding: 9px; border: 1px solid #acbacb; border-radius: 6px; resize: vertical; }
 button { width: 100%; margin-top: 10px; padding: 10px; border: 0; border-radius: 6px; background: #1769cf; color: white; font: inherit; cursor: pointer; }
 button.secondary { background: #e7eef8; color: #123d73; }
+button:disabled { opacity: .6; cursor: wait; }
 button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #ffad35; }
 .muted { color: #5e6c7d; font-size: 13px; }
 #status { min-height: 20px; color: #47586e; }
+#addStatus, #saveStatus { color: #47586e; font-size: 13px; }
 h2 { font-size: 17px; }
 #searchView > section > h2 { color: white; text-shadow: 0 1px 4px #000; }
 .card { margin-bottom: 10px; overflow-wrap: anywhere; }
 .card h3 { margin: 0 0 8px; font-size: 15px; }
 .card p { margin: 6px 0; white-space: pre-wrap; }
+.option-list { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
 .score { color: #53627a; font-size: 12px; }
 .answer { border-top: 1px solid #e5ebf2; padding-top: 8px; }
 .answer-block { margin-top: 12px; padding: 10px 12px; border-left: 4px solid #15925c; border-radius: 6px; background: #e3f8ec; color: #104f36; }

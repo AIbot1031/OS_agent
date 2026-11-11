@@ -15,6 +15,7 @@
     <button id="showSite" class="view active" aria-pressed="true">題庫網站</button>
     <button id="showSite2" class="view" aria-pressed="false">題庫網站 2</button>
     <button id="showSearch" class="view" aria-pressed="false">本機搜尋</button>
+    <button id="showAdd" class="view" aria-pressed="false">新增題目</button>
   </nav>
   <section id="siteView" class="site-view">
     <p class="site-help">在右側直接瀏覽題庫網站。若網站拒絕嵌入，請切換「本機搜尋」。</p>
@@ -68,6 +69,36 @@
       <button id="syncSite" class="secondary">從題庫網站同步最新題目</button>
       <p id="manageStatus" role="status" aria-live="polite"></p>
     </details>
+  </main>
+  <main id="addView" hidden>
+    <section class="controls">
+      <h2>從截圖新增題目</h2>
+      <p class="muted">辨識結果請先核對；只有截圖明確標示正確答案時才會自動填入答案。</p>
+      <button id="addCapture">擷取目前畫面</button>
+      <div id="addPasteZone" class="paste-zone" tabindex="0" role="button" aria-label="貼上新題目的截圖">點這裡，再按 Ctrl+V 貼上截圖</div>
+      <label for="addImageFile">或上傳題目截圖</label>
+      <input id="addImageFile" type="file" accept="image/*">
+      <p id="addStatus" role="status" aria-live="polite"></p>
+      <details><summary>查看完整 OCR 文字</summary><pre id="addRawText"></pre></details>
+    </section>
+    <section class="controls">
+      <label for="newQuestion">題目文字</label>
+      <textarea id="newQuestion" rows="5" placeholder="辨識後請檢查題幹"></textarea>
+      <label for="newOptions">選項（選填，每行一項）</label>
+      <textarea id="newOptions" rows="4" placeholder="A. ...&#10;B. ..."></textarea>
+      <label for="newAnswer">正確答案</label>
+      <textarea id="newAnswer" rows="3" placeholder="截圖未標示答案時，請自行填入正確答案"></textarea>
+      <label for="newSubject">科目</label>
+      <select id="newSubject"><option value="os">作業系統</option><option value="algorithm">演算法</option></select>
+      <label for="newUnit">網站單元（選填）</label>
+      <input id="newUnit" type="number" min="1" step="1" placeholder="例如 6">
+      <label for="newCategory">主題標籤（選填）</label>
+      <input id="newCategory" type="text" placeholder="例如 行程排程">
+      <button id="addSave">加入本機題庫</button>
+      <p id="saveStatus" role="status" aria-live="polite"></p>
+      <button id="exportAdded" class="secondary">匯出自行新增的題目 JSON</button>
+      <p id="manualCount" class="muted"></p>
+    </section>
   </main>
   <script src="search.js"></script>
   <script src="vendor/ocr/tesseract.min.js"></script>

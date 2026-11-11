@@ -54,6 +54,8 @@
           unitLabel,
           category: card.querySelector(".meta span:last-child")?.textContent?.trim() || "",
           question: (card.querySelector(".structured-question") || card.querySelector("h2"))?.textContent?.trim() || "",
+          options: [...card.querySelectorAll(".option")]
+            .map(option => option.textContent?.replace(/✓\s*正確/, "").trim()).filter(Boolean).join("\n"),
           answer: answerBlock || markedOptions || ""
         };
       });
@@ -69,6 +71,7 @@
       unit: item?.unit || item?.單元 || null,
       unitLabel: item?.unitLabel || "",
       category: item?.category || item?.章節 || item?.主題 || "",
+      options: item?.options || item?.選項 || "",
       question: item && typeof item === "object" ? pick(item, questionKeys) : "",
       answer: item && typeof item === "object" ? pick(item, answerKeys) : ""
     })).filter(x => x.question);
@@ -88,6 +91,7 @@
           unit: item.unit || old.unit,
           unitLabel: item.unitLabel || old.unitLabel,
           category: item.category || old.category,
+          options: item.options || old.options,
           answer: item.answer || old.answer
         } : item);
       }
