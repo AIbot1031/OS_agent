@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "題庫側邊搜尋",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "從目前頁面的題目文字搜尋自己匯入的題庫。",
   "permissions": ["activeTab", "scripting", "storage", "sidePanel", "tabs"],
   "host_permissions": ["https://ccsa.nfu.edu.tw/*", "https://os-study-notebook.shij.chatgpt.site/*"],
@@ -13,6 +13,11 @@
     }
   },
   "action": { "default_title": "開啟題庫搜尋" },
+  "content_scripts": [{
+    "matches": ["https://os-study-notebook.shij.chatgpt.site/*"],
+    "js": ["site-ocr-entry.js"],
+    "run_at": "document_idle"
+  }],
   "background": { "service_worker": "background.js" },
   "side_panel": { "default_path": "panel.html" }
 }

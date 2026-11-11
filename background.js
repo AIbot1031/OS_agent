@@ -1,5 +1,14 @@
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== "open-ocr-panel" || !sender.tab?.id) return;
+  chrome.sidePanel.open({ tabId: sender.tab.id })
+    .then(() => chrome.storage.session.set({ openOcrPanel: true }))
+    .then(() => sendResponse({ ok: true }))
+    .catch(error => sendResponse({ ok: false, error: error.message }));
+  return true;
+});
+
 chrome.commands.onCommand.addListener(async command => {
   if (command !== "capture-search") return;
   try {

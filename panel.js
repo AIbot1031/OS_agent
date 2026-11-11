@@ -27,6 +27,7 @@ const defaultSecondSite = {
   url: "https://yocheng06.github.io/course-library/submit.html?v=theme-toggle-20261027",
   name: "題庫網站 2"
 };
+const originalSiteUrl = "https://os-study-notebook.shij.chatgpt.site/";
 
 function switchView(view) {
   for (const [name, panel, button] of [
@@ -138,8 +139,49 @@ function render(matches) {
       }
       card.append(answer);
     }
+    if (item.subject === "algorithm" || item.subject === "os") {
+      const openOnSite = document.createElement("button");
+      openOnSite.className = "secondary";
+      openOnSite.textContent = "在原題庫網站查看這題";
+      openOnSite.addEventListener("click", () => showQuestionOnSite(item));
+      card.append(openOnSite);
+    }
     results.append(card);
   }
+}
+
+async function showQuestionOnSite(item) {
+  try {
+    const tabs = await chrome.tabs.query({ url: "https://os-study-notebook.shij.chatgpt.site/*" });
+    const tab = tabs[0] || await chrome.tabs.create({ url: originalSiteUrl, active: true });
+    await chrome.tabs.update(tab.id, { active: true });
+    await waitForTab(tab.id);
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: async ({ subject, question }) => {
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+        const wanted = subject === "os" ? "作業系統" : "演算法";
+        for (let i = 0; i < 100 && !document.querySelector("#home-button"); i++) await sleep(100);
+        if (document.querySelector("#subject-title")?.textContent?.trim() !== wanted || document.querySelector("#study")?.hidden) {
+          document.querySelector("#home-button")?.click();
+          for (let i = 0; i < 100 && document.querySelector("#home")?.hidden; i++) await sleep(100);
+          document.querySelector(`[data-subject="${subject}"]`)?.click();
+        }
+        for (let i = 0; i < 100 && document.querySelector("#subject-title")?.textContent?.trim() !== wanted; i++) await sleep(100);
+        document.querySelector('.unit-button[data-unit="all"]')?.click();
+        document.querySelector("#lookup")?.click();
+        const input = document.querySelector("input#search");
+        if (!input) throw new Error("網站搜尋欄不存在");
+        input.value = question;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+        return true;
+      },
+      args: [{ subject: item.subject, question: item.question }]
+    });
+    if (!result?.result) throw new Error("無法在網站搜尋此題");
+    setStatus("已在原題庫網站搜尋這題。");
+  } catch (error) { setStatus(`開啟題目失敗：${error.message}`); }
 }
 
 function runSearch(queries) {
@@ -276,7 +318,7 @@ async function consumePendingScreenshot() {
   if (consumingScreenshot) return;
   consumingScreenshot = true;
   try {
-    const data = await chrome.storage.session.get(["pendingScreenshot", "captureError"]);
+    const data = await chrome.storage.session.get(["pendingScreenshot", "captureError", "openOcrPanel"]);
     if (data.pendingScreenshot) {
       await chrome.storage.session.remove(["pendingScreenshot", "captureError"]);
       await recognizeAndSearch(data.pendingScreenshot);
@@ -284,11 +326,16 @@ async function consumePendingScreenshot() {
       await chrome.storage.session.remove("captureError");
       switchView("search");
       setStatus(`快捷鍵截圖失敗：${data.captureError}`);
+    } else if (data.openOcrPanel) {
+      await chrome.storage.session.remove("openOcrPanel");
+      switchView("search");
+      pasteZone.focus();
+      setStatus("請複製題目截圖後按 Ctrl+V，或在上方選擇圖片檔案。");
     }
   } finally { consumingScreenshot = false; }
 }
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "session" && (changes.pendingScreenshot || changes.captureError)) consumePendingScreenshot();
+  if (area === "session" && (changes.pendingScreenshot || changes.captureError || changes.openOcrPanel)) consumePendingScreenshot();
 });
 consumePendingScreenshot();
 

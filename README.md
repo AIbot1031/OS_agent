@@ -16,6 +16,8 @@ Chrome / Edge Manifest V3 擴充功能。點工具列圖示，在右側開啟面
 
 預設快捷鍵為 Windows / Linux 的 `Ctrl+Shift+Y`、macOS 的 `Command+Shift+Y`，會擷取畫面並開啟側邊欄。若瀏覽器沒有啟用該組合或與其他快捷鍵衝突，請在 `chrome://extensions/shortcuts` 修改「截圖辨識並在側邊欄搜尋題目」。
 
+開啟原題庫網站 `os-study-notebook.shij.chatgpt.site` 時，已安裝的擴充功能會在網頁右下角加入「截圖辨識題目」按鈕。按下後會開啟側欄的本機搜尋，可貼上或上傳題目截圖。辨識結果中的「在原題庫網站查看這題」會把選中的題目帶回網站搜尋欄。此入口由擴充功能加入，不會修改網站伺服器或讓未安裝擴充功能的訪客看到按鈕。
+
 OCR 使用 Tesseract.js 7.0.0、Tesseract.js Core 7.0.0，以及 `@tesseract.js-data/chi_tra` 與 `@tesseract.js-data/eng` 1.0.0 的模型，隨擴充功能打包。程式授權檔存於 `vendor/ocr/`；辨識時不會把截圖送到外部服務。
 
 如果「題庫網站」是空白或顯示拒絕連線，代表該網站禁止嵌入其他頁面；此限制由網站設定決定。可使用「本機搜尋」或按「在新分頁開啟題庫網站」。
