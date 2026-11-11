@@ -76,9 +76,9 @@
     return parts;
   }
 
-  const optionPattern = /^\s*(?:([A-HＡ-Ｈ])[.)．、]|[（(]\s*([A-HＡ-Ｈ])\s*[)）]|([1-9１-９])[.)．、]|([①-⑩]))\s*(.*)$/i;
-  const answerPattern = /^(?:正\s*確\s*答\s*案|參\s*考\s*答\s*案|標\s*準\s*答\s*案|correct\s+answers?)\s*[:：]?\s*(.*)$/i;
-  const stopPattern = /^(?:解析|說明|你的答案|得分|下一題|下一頁|題目\s*\d*\s*[:：]|explanation|score)/i;
+  const optionPattern = /^\s*(?:([A-HＡ-Ｈ])[.):：﹕.．。、]|[（(]\s*([A-HＡ-Ｈ])\s*[)）]|([1-9１-９])[.):：﹕.．。、]|([①-⑩]))\s*(.*)$/i;
+  const answerPattern = /^(?:正\s*確\s*答\s*案|參\s*考\s*答\s*案|標\s*準\s*答\s*案|correct\s+answers?)\s*[:：﹕.．。]?\s*(.*)$/i;
+  const stopPattern = /^(?:解析|說明|你的答案|得分|下一題|下一頁|題目\s*\d*\s*[:：﹕.．。]|explanation|score)/i;
   const linesOf = text => String(text).split(/\r?\n/).map(line => line.replace(/\s+/g, " ").trim()).filter(Boolean);
 
   function optionParts(line) {
@@ -90,14 +90,14 @@
 
   function extractQuestion(text) {
     const lines = linesOf(text);
-    const questionStart = lines.findIndex(line => /^(?:題目|問題|question)\s*\d*\s*[:：]/i.test(line));
+    const questionStart = lines.findIndex(line => /^(?:題目|問題|question)\s*\d*\s*[:：﹕.．。]/i.test(line));
     const start = questionStart >= 0 ? questionStart : Math.max(0, lines.findIndex(line => line.length >= 12));
     const selected = [];
-    const end = /^(?:正確答案|你的答案|答案|解析|得分|選項|answer|explanation)\s*[:：]?/i;
+    const end = /^(?:正確答案|你的答案|答案|解析|得分|選項|answer|explanation)\s*[:：﹕.．。]?/i;
     for (const line of lines.slice(start)) {
       if (optionParts(line) || answerPattern.test(line) || end.test(line) || (selected.length && /^[A-DＡ-Ｄ]\s{1,3}\S/.test(line))) break;
-      const withoutPrefix = line.replace(/^(?:題目|問題|question)\s*\d*\s*[:：]\s*/i, "");
-      const inlineOption = withoutPrefix.search(/\s(?:A[.)．、]|[（(]A[)）])\s*/i);
+      const withoutPrefix = line.replace(/^(?:題目|問題|question)\s*\d*\s*[:：﹕.．。]\s*/i, "");
+      const inlineOption = withoutPrefix.search(/\s(?:A[.):：﹕.．。、]|[（(]A[)）])\s*/i);
       const questionLine = inlineOption > 0 ? withoutPrefix.slice(0, inlineOption) : withoutPrefix;
       if (questionLine) selected.push(questionLine);
       if (inlineOption > 0) break;
@@ -126,7 +126,7 @@
     const parsedOptions = [];
     if (optionStart >= 0 && optionStart < optionEnd) {
       for (const line of lines.slice(optionStart, optionEnd)) {
-        if (/^(?:你的答案|答案|解析|得分)\s*[:：]?/.test(line)) break;
+        if (/^(?:你的答案|答案|解析|得分)\s*[:：﹕.．。]?/.test(line)) break;
         const option = optionParts(line);
         if (option) parsedOptions.push(option);
         else if (parsedOptions.length && line.length <= 180) parsedOptions[parsedOptions.length - 1].text += ` ${line}`;
@@ -134,7 +134,7 @@
     }
     const options = parsedOptions.map(option => `${option.label}. ${option.text}`).join("\n").slice(0, 2000);
     if (answer && parsedOptions.length) {
-      const compact = answer.normalize("NFKC").replace(/\bAND\b/gi, "").replace(/[\s,，、/|&+及與和()（）]/g, "");
+      const compact = answer.normalize("NFKC").replace(/\bAND\b/gi, "").replace(/[\s,，、;；/|&+及與和()（）]/g, "");
       if (/^[A-H1-9]+$/i.test(compact)) {
         const mapped = [...compact.toUpperCase()].map(label => parsedOptions.find(option => option.label === label))
           .filter(Boolean).map(option => `${option.label}. ${option.text}`);
