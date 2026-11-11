@@ -50,12 +50,20 @@
         <pre id="ocrText"></pre>
       </details>
     </section>
+    <section id="ocrQuestionBox" class="controls" hidden>
+      <h2>截圖辨識的題目（不含選項）</h2>
+      <p class="muted">直接取自截圖辨識，與題庫搜尋結果無關；複製前可修正錯字。</p>
+      <label for="ocrQuestionText">辨識出的題目</label>
+      <textarea id="ocrQuestionText" rows="4"></textarea>
+      <button id="copyOcrQuestion">複製截圖辨識題目</button>
+      <p id="ocrCopyStatus" role="status" aria-live="polite"></p>
+    </section>
     <section id="questionBox" class="controls" hidden>
-      <h2>題目文字（不含選項）</h2>
+      <h2>題庫配對的題目</h2>
       <p id="questionSource" class="muted"></p>
-      <label for="questionText">複製前可在這裡修正辨識錯字</label>
+      <label for="questionText">題庫中的題幹</label>
       <textarea id="questionText" rows="4"></textarea>
-      <button id="copyQuestion">一鍵複製題目</button>
+      <button id="copyQuestion">複製題庫題目</button>
       <p id="copyStatus" role="status" aria-live="polite"></p>
     </section>
     <section>
